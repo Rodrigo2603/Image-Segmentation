@@ -29,4 +29,4 @@ def main(imagem,tipo,filtro,m,n):
     
 
 if __name__ == '__main__':
-    main('Image_(1)','otsu','Gaussian',0.3,0.7)
+    main('imagem2','otsu','Gaussian', 0.3, 0.7)
