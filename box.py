@@ -57,7 +57,7 @@ def all_box(imagem):
     def plot_images(original, filtered_2x2, filtered_3x3, filtered_5x5, filtered_7x7):
         fig, axs = plt.subplots(1, 5, figsize=(15, 5))
         axs[0].imshow(original, cmap='gray')
-        axs[0].set_title("Original")
+        axs[0].set_title("Grayscale")
 
         axs[1].imshow(filtered_2x2, cmap='gray')
         axs[1].set_title("Filtro 2x2")

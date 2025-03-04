@@ -67,7 +67,7 @@ def all_otsu(imagem):
     # Exibir imagens lado a lado
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
     axes[0].imshow(image.convert("L"), cmap="gray")
-    axes[0].set_title("Imagem Original")
+    axes[0].set_title("Imagem Grayscale")
     axes[0].axis("off")
 
     axes[1].imshow(segmented_image, cmap="gray")
