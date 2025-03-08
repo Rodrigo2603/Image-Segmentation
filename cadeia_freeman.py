@@ -13,7 +13,7 @@ def all_cadeia_freeman(imagem):
 
     def freeman_chain_code(binary_image):
 
-        # Encontra o pixel de fronteira mais na esquerda e pra cima
+        # Encontra o pixel de fronteira mais pra cima (da esquerda pra direita)
         def find_start_point(image):
             for row in range(image.shape[0]):
                 for col in range(image.shape[1]):
@@ -42,7 +42,7 @@ def all_cadeia_freeman(imagem):
             else:
                 return None
 
-        # Encontra o próximo vizinha na fronteira
+        # Encontra o próximo vizinho na fronteira
         def find_next_boundary_pixel(image, current_row, current_col, previous_direction):
             search_order = [(previous_direction + i) % 8 for i in range(1, 9)]
             for direction in search_order:
@@ -54,9 +54,10 @@ def all_cadeia_freeman(imagem):
                         return new_row, new_col, direction
             return None
 
+        # Busca algum objeto na imagem
         start_point = find_start_point(binary_image)
         if start_point is None:
-            print("No object found in the image.")
+            print("Não foi encontrado nenhum objeto na imagem.")
             return None
 
         chain_code = ""
@@ -86,6 +87,7 @@ def all_cadeia_freeman(imagem):
                     print("Loop detectado. Encerrando a iteração.")
                     break
 
+            # Adiciona aos pixels visitados para evitar loops e a fronteira para o plot
             visited_pixels.add((next_row, next_col))
             boundary_pixels.append((next_row, next_col))
 
@@ -102,7 +104,7 @@ def all_cadeia_freeman(imagem):
     if binary_image is not None:
         chain_code, boundary_pixels = freeman_chain_code(binary_image)
         if chain_code:
-            print("Freeman Chain Code:", chain_code)
+            print("Código de Freeman:", chain_code)
 
             plt.figure(figsize=(10, 5))
             plt.subplot(1, 2, 1)
@@ -113,9 +115,9 @@ def all_cadeia_freeman(imagem):
             plt.subplot(1, 2, 2)
             plt.imshow(binary_image, cmap='gray')
             rows, cols = zip(*boundary_pixels)
-            plt.plot(cols, rows, 'r-', linewidth=2)
+            plt.plot(cols, rows, 'b-', linewidth=2)
             plt.title("Fronteira Conectada")
             plt.axis('off')
             plt.show()
         else:
-            print("Could not generate chain code.")
+            print("Não pode gerar o código da cadeia.")

@@ -3,7 +3,7 @@ from PIL import Image
 
 def all_box(imagem):
     
-    # Retorna a imagem em grayscale, sua altura e sua largura
+    # Retorna a imagem em grayscale, sua largura e sua altura
     def read_image(filename):
         img = Image.open(filename).convert("L")
         width, height = img.size

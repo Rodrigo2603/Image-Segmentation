@@ -24,7 +24,7 @@ def all_marr_hildreth(imagem):
         kernel = gaussian_kernel(size, sigma)
         return scipy.ndimage.convolve(image_array, kernel, mode='reflect')
 
-    # Cálculo da Laplaciana
+    # Cálculo da Laplaciana (LoG)
     def apply_laplacian(image_array):
         laplacian_kernel = np.array([[1, 1, 1],
                                     [1, -8, 1],
