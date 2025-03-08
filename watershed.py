@@ -11,8 +11,7 @@ def all_watershed(imagem):
 
     # Aplica binarização simples usando um limiar baseado na média
     def threshold_manual(image):
-        
-        threshold = np.mean(image)
+        threshold = 150
         binary = np.where(image > threshold, 255, 0).astype(np.uint8)
         return binary
 

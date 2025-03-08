@@ -2,7 +2,6 @@ import os
 import box
 import cadeia_freeman
 import canny
-import contar_objetos
 import intensidade
 import marr_hildreth
 import otsu
@@ -17,11 +16,10 @@ def main():
         "1": ("Box", box.all_box),
         "2": ("Cadeia Freeman", cadeia_freeman.all_cadeia_freeman),
         "3": ("Canny", canny.all_canny),
-        "4": ("Contar Objetos", contar_objetos.all_contar_objetos),
-        "5": ("Intensidade", intensidade.all_intensidade),
-        "6": ("Marr-Hildreth", marr_hildreth.all_marr_hildreth),
-        "7": ("Otsu", otsu.all_otsu),
-        "8": ("Watershed", watershed.all_watershed),
+        "4": ("Intensidade", intensidade.all_intensidade),
+        "5": ("Marr-Hildreth", marr_hildreth.all_marr_hildreth),
+        "6": ("Otsu", otsu.all_otsu),
+        "7": ("Watershed", watershed.all_watershed),
     }
 
     print("Escolha um método para aplicar:")

@@ -1,41 +1,64 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+import otsu
+import watershed
 
-def all_contar_objetos(imagem):
-    def contar_objetos(imagem_path):
-        # Carregar a imagem
-        imagem = cv2.imread(imagem_path)
+def detectar_objetos(imagem_path, min_area=100, kernel_size=5):
+    # 1. Carregar imagem e converter para escala de cinza
+    img = cv2.imread(imagem_path)
+    cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    # 2. Aplicar Otsu para binarização automática
+    _, binaria = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    
+    # 3. Pós-processamento morfológico (fechamento para remover ruídos)
+    kernel = np.ones((kernel_size, kernel_size), np.uint8)
+    processada = cv2.morphologyEx(binaria, cv2.MORPH_CLOSE, kernel)
+    
+    # 4. Encontrar contornos dos objetos
+    contornos, _ = cv2.findContours(processada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # 5. Filtrar e desenhar resultados
+    resultado = img.copy()
+    objetos = []
+    
+    for cnt in contornos:
+        area = cv2.contourArea(cnt)
+        if area > min_area:
+            # Retângulo delimitador
+            x, y, w, h = cv2.boundingRect(cnt)
+            
+            # Armazenar dados do objeto
+            objetos.append({
+                'posicao': (x, y),
+                'dimensoes': (w, h),
+                'area': area
+            })
+            
+            # Desenhar contorno e retângulo
+            cv2.drawContours(resultado, [cnt], -1, (0, 255, 0), 2)
+            cv2.rectangle(resultado, (x, y), (x+w, y+h), (0, 0, 255), 2)
+    
+    return resultado, objetos
 
-        # Converter para HSV e extrair o canal de saturação (melhora a separação de cores)
-        imagem_hsv = cv2.cvtColor(imagem, cv2.COLOR_BGR2HSV)
-        saturacao = imagem_hsv[:, :, 1]  
+# Exemplo de uso
+imagem_path = f"7.jpg"
+watershed.all_watershed(imagem_path)
+otsu.all_otsu("../resultados/watershed.jpg")
+imagem_resultado, objetos_detectados = detectar_objetos("./resultados/otsu.jpg")
 
-        # Aplicar suavização para reduzir ruído
-        saturacao = cv2.GaussianBlur(saturacao, (5,5), 0)
+# Mostrar resultados
+plt.figure(figsize=(12, 6))
+plt.subplot(121), plt.imshow(cv2.cvtColor(cv2.imread(f"./imagens/{imagem_path}"), cv2.COLOR_BGR2RGB))
+plt.title('Imagem Original')
+plt.subplot(122), plt.imshow(cv2.cvtColor(imagem_resultado, cv2.COLOR_BGR2RGB))
+plt.title('Objetos Detectados')
+plt.show()
 
-        # Aplicar segmentação com Otsu
-        _, binarizada = cv2.threshold(saturacao, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-        # Remover pequenos ruídos
-        kernel = np.ones((3, 3), np.uint8)
-        binarizada = cv2.morphologyEx(binarizada, cv2.MORPH_OPEN, kernel, iterations=2)
-
-        # Aplicar K-Means para agrupar regiões semelhantes
-        Z = imagem.reshape((-1,3))
-        Z = np.float32(Z)
-        K = 3  # Número de clusters ajustável
-        _, labels, centers = cv2.kmeans(Z, K, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0), 10, cv2.KMEANS_RANDOM_CENTERS)
-        clustered = labels.reshape((imagem.shape[0], imagem.shape[1]))
-
-        # Encontrar contornos
-        contornos, _ = cv2.findContours(binarizada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        # Filtrar objetos muito pequenos
-        objetos_filtrados = [c for c in contornos if cv2.contourArea(c) > 500]  
-
-        return len(objetos_filtrados)
-
-    # Exemplo de uso
-    imagem_path = f"./imagens/{imagem}"  # Substituir pelo caminho da imagem
-    quantidade = contar_objetos(imagem_path)
-    print(f"Quantidade de objetos detectados: {quantidade}")
+print(f"Foram detectados {len(objetos_detectados)} objetos:")
+for i, obj in enumerate(objetos_detectados, 1):
+    print(f"Objeto {i}:")
+    print(f" - Posição: {obj['posicao']}")
+    print(f" - Dimensões: {obj['dimensoes']}")
+    print(f" - Área: {obj['area']} pixels")

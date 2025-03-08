@@ -102,6 +102,7 @@ def all_canny(imagem):
         
         final_edges = final_edges.astype(np.uint8)
         result = Image.fromarray(final_edges)
+        result.save("./resultados/canny_edges.jpg")
 
         # Plotar imagens
         fig, ax = plt.subplots(1, 2, figsize=(12, 6))
