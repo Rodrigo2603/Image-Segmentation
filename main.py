@@ -1,55 +1,100 @@
 import os
-import box
-import cadeia_freeman
-import canny
+from PIL import Image
+import box 
+import cadeia_freeman 
+import canny 
+import contar_objetos 
 import intensidade
-import marr_hildreth
-import otsu
+import marr_hildreth 
+import otsu 
 import watershed
 
-def listar_imagens(diretorio="imagens"):
-    imagens = [f for f in os.listdir(diretorio) if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff"))]
+nomes = [
+    "Filtro Box ",
+    "Cadeia de Freeman",
+    "Canny",
+    "Contar Objetos",
+    "Modificar Intensidade",
+    "Marr-Hildreth",
+    "Otsu",
+    "Watershed"
+]
+
+def listar_imagens(diretorio):
+    imagens = [f for f in os.listdir(diretorio) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
     return imagens
 
+def exibir_menu_algoritmos(nomes_algoritmos):
+    print("\nEscolha o algoritmo a ser aplicado:")
+    for i, nome in enumerate(nomes_algoritmos, start=1):
+        print(f"{i} - {nome}")
+    while True:
+        try:
+            escolha = int(input("Digite o número do algoritmo: "))
+            if 1 <= escolha <= len(nomes_algoritmos):
+                return escolha
+            else:
+                print("Escolha inválida. Tente novamente.")
+        except ValueError:
+            print("Entrada inválida. Digite um número.")
+
 def main():
-    metodos = {
-        "1": ("Box", box.all_box),
-        "2": ("Cadeia Freeman", cadeia_freeman.all_cadeia_freeman),
-        "3": ("Canny", canny.all_canny),
-        "4": ("Intensidade", intensidade.all_intensidade),
-        "5": ("Marr-Hildreth", marr_hildreth.all_marr_hildreth),
-        "6": ("Otsu", otsu.all_otsu),
-        "7": ("Watershed", watershed.all_watershed),
-    }
+    imagens_dir = './imagens'
+    resultados_dir = './resultados'
+    os.makedirs(resultados_dir, exist_ok=True)
 
-    print("Escolha um método para aplicar:")
-    for key, (nome, _) in metodos.items():
-        print(f"{key} - {nome}")
+    imagens = listar_imagens(imagens_dir)
 
-    escolha_metodo = input("Digite o número do método desejado: ")
-
-    if escolha_metodo not in metodos:
-        print("Opção inválida. Tente novamente.")
-        return
-
-    imagens = listar_imagens()
     if not imagens:
-        print("Nenhuma imagem encontrada no diretório 'imagens/'.")
+        print("Nenhuma imagem encontrada na pasta ./imagens")
         return
 
-    print("\nEscolha uma imagem:")
-    for idx, img in enumerate(imagens, 1):
-        print(f"{idx} - {img}")
+    print("Imagens disponíveis:")
+    for idx, nome_img in enumerate(imagens, start=1):
+        print(f"{idx} - {nome_img}")
 
-    escolha_img = input("Digite o número da imagem desejada: ")
-
-    if not escolha_img.isdigit() or int(escolha_img) not in range(1, len(imagens) + 1):
-        print("Opção inválida. Tente novamente.")
+    img_idx = int(input("Escolha a imagem pelo número: ")) - 1
+    if img_idx < 0 or img_idx >= len(imagens):
+        print("Escolha inválida!")
         return
 
-    imagem_escolhida = f"{imagens[int(escolha_img) - 1]}"
-    funcao = metodos[escolha_metodo][1]
-    funcao(imagem_escolhida) 
+    imagem_escolhida = imagens[img_idx]
+    print(imagem_escolhida)
+    caminho_imagem = os.path.join(imagens_dir, imagem_escolhida)
+    imagem = Image.open(caminho_imagem)
 
-if __name__ == '__main__':
+    algoritmo = exibir_menu_algoritmos(nomes)
+
+    if algoritmo == 1:
+        resultados = box.box_filter(imagem)
+        for i, img in enumerate(resultados, start=1):
+            img.save(f"{resultados_dir}/box_filter_{i}.jpg")
+    elif algoritmo == 2:
+        cadeia_freeman.executar_freeman_chain_code(imagem)
+    elif algoritmo == 3:
+        resultado = canny.canny_edge_detection(imagem)
+        resultado.save(f"{resultados_dir}/canny.jpg")
+    elif algoritmo == 4: 
+        if imagem_escolhida in ('0.jpg', '1.jpg', '4.jpg', '6.jpg', '7.jpg'):
+            resultado = contar_objetos.detectar_todos_objetos(imagem, 195)
+        elif imagem_escolhida in ('3.png', '5.jpg'):
+            resultado = contar_objetos.detectar_todos_objetos(imagem, 115)
+        else:
+            resultado = contar_objetos.detectar_todos_objetos(imagem, 105)
+    elif algoritmo == 5:
+        resultado = intensidade.segment_image(imagem)
+        resultado.save(f"{resultados_dir}/intensidade_modificada.jpg")
+    elif algoritmo == 6:
+        resultado = marr_hildreth.marr_hildreth_edge_detection(imagem)
+        resultado.save(f"{resultados_dir}/marr_hildreth.jpg")
+    elif algoritmo == 7:
+        resultado = otsu.otsu_segmentation(imagem)
+        resultado.save(f"{resultados_dir}/otsu.jpg")
+    elif algoritmo == 8:
+        resultado = watershed.plotar(imagem, 100)
+    else:
+        print("Algoritmo inválido!")
+        return
+
+if __name__ == "__main__":
     main()
